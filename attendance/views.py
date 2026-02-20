@@ -1,6 +1,10 @@
 from rest_framework import generics, permissions
-from .models import Subject
-from .serializers import SubjectSerializer
+from .models import Subject,Attendance
+from .serializers import (
+    SubjectSerializer,
+    ClassSessionSerializer,
+    AttendanceSerializer
+)
 
 class IsTeacher(permissions.BasePermission):
 
@@ -17,3 +21,31 @@ class CreateSubjectView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(teacher=self.request.user)
+
+class StartSessionView(generics.CreateAPIView):
+    serializer_class = ClassSessionSerializer
+    permission_classes = [IsTeacher]
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+class ActiveSessionsView(generics.ListAPIView):
+    serializer_class = ClassSessionSerializer
+
+    def get_queryset(self):
+        return ClassSession.objects.filter(is_active=True)
+
+class MarkAttendanceView(generics.CreateAPIView):
+    serializer_class = AttendanceSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(student=self.request.user)
+
+
+class ApproveAttendanceView(generics.UpdateAPIView):
+    queryset = Attendance.objects.all()
+    serializer_class = AttendanceSerializer
+    permission_classes = [IsTeacher]
+
+    def perform_update(self, serializer):
+        serializer.save(is_approved=True)
