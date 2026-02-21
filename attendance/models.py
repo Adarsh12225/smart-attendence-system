@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
 
 
 class Subject(models.Model):
@@ -13,10 +14,9 @@ class Subject(models.Model):
     def __str__(self):
         return self.name
 
-
 class ClassSession(models.Model):
     subject = models.ForeignKey(
-        Subject,
+        'Subject',
         on_delete=models.CASCADE,
         related_name="sessions"
     )
@@ -28,15 +28,8 @@ class ClassSession(models.Model):
 
 
 class Attendance(models.Model):
-    session = models.ForeignKey(
-        ClassSession,
-        on_delete=models.CASCADE,
-        related_name="attendances"
-    )
-    student = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
+    session = models.ForeignKey(ClassSession, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     is_approved = models.BooleanField(default=False)
     marked_at = models.DateTimeField(auto_now_add=True)
 
